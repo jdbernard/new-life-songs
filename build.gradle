@@ -1,5 +1,6 @@
 apply plugin: "groovy"
 apply plugin: "maven"
+apply plugin: "war"
 
 group = "com.jdbernard"
 version = "2.0"
@@ -14,9 +15,11 @@ dependencies {
     compile 'ch.qos.logback:logback-core:1.1.2'
     compile 'ch.qos.logback:logback-classic:1.1.2'
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
-    compile 'javax.servlet:javax.servlet-api:3.1.0'
     compile 'com.zaxxer:HikariCP-java6:2.3.2'
     compile 'com.impossibl.pgjdbc-ng:pgjdbc-ng:0.3'
+    runtime 'org.glassfish.jersey.media:jersey-media-json-jackson:2.16'
+    runtime 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.3.2'
+    providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
     runtime 'org.glassfish.jersey.containers:jersey-container-servlet:2.16'
 
     testCompile 'junit:junit:4.12'
