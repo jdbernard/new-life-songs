@@ -207,6 +207,8 @@ public class NLSongsDB {
         return sql.updateCount }
 
     private static User buildUser(def row) {
+        if (!row) return null
+
         User user = new User(username: row["username"], role: row["role"])
         user.@pwd = row["pwd"]
 
@@ -291,7 +293,10 @@ public class NLSongsDB {
         return record }
 
     private static Token buildToken(def row) {
+        if (!row) return null
+
         User user = buildUser(row)
+        assert user != null
 
         return new Token(
             token: row["token"], user: user, expires: row["expires"]) }

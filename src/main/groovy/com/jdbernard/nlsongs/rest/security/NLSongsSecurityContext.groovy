@@ -25,7 +25,7 @@ public class NLSongsSecurityContext implements SecurityContext {
     }
 
     @Override
-    public String getAuthenticationScheme() { return "Authentication-Token" }
+    public String getAuthenticationScheme() { return "Authorization-Token" }
 
     @Override
     public Principal getUserPrincipal() { return principal }
