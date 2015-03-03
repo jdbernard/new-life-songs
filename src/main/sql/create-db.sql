@@ -46,15 +46,18 @@ CREATE TABLE IF NOT EXISTS performances (
     FOREIGN KEY (song_id) REFERENCES songs (id));
 
 
-DROP TABLE IF EXISTS api_keys;
-CREATE TABLE IF NOT EXISTS api_keys (
-    key VARCHAR(32) NOT NULL,
-    description VARCHAR(256) NOT NULL,
-    PRIMARY KEY (key));
-
-
 DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL,
-    username VARCHAR(64),
-    pwd VARCHAR(80));
+    username VARCHAR(64) UNIQUE NOT NULL,
+    pwd VARCHAR(80),
+    role VARCHAR(16) NOT NULL,
+    PRIMARY KEY (id));
+
+DROP TABLE IF EXISTS tokens;
+CREATE TABLE IF NOT EXISTS tokens (
+    token VARCHAR(64),
+    user_id INTEGER NOT NULL,
+    expires TIMESTAMP NOT NULL,
+    PRIMARY KEY (token),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE);
