@@ -80,6 +80,10 @@ public class NLSongsDB {
             'UPDATE services SET "date" = ?, service_type = ? WHERE id = ?',
             [sdf.format(service.date), service.serviceType, service.id] ) }
 
+    public int delete(Service service) {
+        sql.execute("DELETE FROM services WHERE id = ?", [service.id])
+        return sql.updateCount }
+
     /// ### Songs
     public Song findSong(int id) {
         def row = sql.firstRow("SELECT * FROM songs WHERE id = ?", [id])
@@ -126,6 +130,10 @@ public class NLSongsDB {
             "UPDATE songs SET name = ?, artists = ? WHERE id = ?",
             [song.name, wrapArtists(song.artists), song.id] ) }
 
+    public int delete(Song song) {
+        sql.execute("DELETE FROM songs WHERE id = ?", [song.id])
+        return sql.updateCount }
+
     /// ### Performances
     public Performance findPerformance(int serviceId, int songId) {
         def perf = sql.firstRow(
@@ -162,34 +170,92 @@ public class NLSongsDB {
 
     public int delete(Performance perf) {
         sql.execute(
-            "DELETE FROM performances WHERE service_id = ? AND song_id = ?")
-        return sql.getUpdateCount() }
+            "DELETE FROM performances WHERE service_id = ? AND song_id = ?",
+            [perf.service_id, perf.song_id] )
+        return sql.updateCount }
 
-    /// ### API Keys
-    public ApiKey findKey(String key) {
-        def row = sql.firstRow("SELECT * FROM api_keys WHERE key = ?", [key])
-        return recordToModel(row, ApiKey) }
+    /// ### Users
+    public List<User> findAllUsers() {
+        return sql.rows("SELECT * FROM users").
+            collect { buildUser(it); } }
+        
+    public User findUser(String username) {
+        def row = sql.firstRow("SELECT * FROM users WHERE username = ?",
+            [username])
+        return buildUser(row) }
 
-    public ApiKey save(ApiKey apiKey) {
-        if (findKey(apiKey.key)) {
-            update(apiKey)
-            return apiKey }
-        else return create(apiKey) }
+    public User save(User user) {
+        if (findUser(user.username)) {
+            update(user); return user }
+        else return create(user) }
 
-    public ApiKey create(ApiKey apiKey) {
-        sql.executeInsert(
-            "INSERT INTO api_keys (key, description) VALUES (?, ?)",
-            [apiKey.key, apiKey.description] )
+    public User create(User user) {
+        int newId = sql.executeInsert(
+            "INSERT INTO users (username, pwd, role) VALUES (?, ?, ?)",
+            [user.username, user.pwd, user.role])[0][0]
 
-        return apiKey }
+        user.id = newId
+        return user }
 
-    public int update(ApiKey apiKey) {
+    public int update(User user) {
         return sql.executeUpdate(
-            "UPDATE api_keys SET description = ? WHERE key = ?",
-            [apiKey.description, apiKey.key]) }
+            "UPDATE user SET username = ?, pwd = ?, role = ? WHERE id = ?",
+            [user.username, user.pwd, user.role, user.id]) }
 
-    /// ### User management
-    // TODO
+    public int delete(User user) {
+        sql.execute("DELETE FROM users WHERE username = ?")
+        return sql.updateCount }
+
+    private static User buildUser(def row) {
+        User user = new User(username: row["username"], role: row["role"])
+        user.@pwd = row["pwd"]
+
+        return user; }
+
+    /// ### Tokens
+    public Token findToken(String token) {
+        def row = sql.firstRow("""\
+            SELECT t.*, u.*
+            FROM
+                tokens t JOIN
+                users u ON
+                    t.user_id = u.id
+            WHERE t.token = ?""", [token])
+        return buildToken(row) }
+
+    public Token renewToken(Token token) {
+        def foundToken = findToken(token.token);
+
+        // If the token has expired we will not renew it.
+        if (new Date() > token.expires) return null;
+
+        // Otherwise, renew and return the new values.
+        assert sql.executeUpdate("UPDATE tokens SET " +
+            "expires = current_timestamp + interval '1 day' WHEREtoken = ?", 
+            [token.token]) == 1
+
+        def updatedToken = findToken(token.token);
+        token.expires = updatedToken.expires;
+        return token; }
+        
+    public Token save(Token token) {
+        if (findToken(token.token)) {
+            update(token); return token }
+        else return create(token) }
+
+    public Token create(Token token) {
+        sql.executeInsert("INSERT INTO tokens VALUES (?, ?, ?)",
+            [token.token, token.user.id, token.expires])
+        return Token }
+
+    public int update(Token token) {
+        return sql.executeUpdate(
+            "UPDATE tokens SET expires = ? WHERE token = ?",
+            [token.expires, token.token]) }
+
+    public int delete(Token token) {
+        sql.execute("DELETE FROM tokens WHERE token = ?", [token.token])
+        return sql.updateCount }
 
     /// ### Utility functions
     static def recordToModel(def record, Class clazz) {
@@ -223,6 +289,12 @@ public class NLSongsDB {
 
             record[recordKey] = v }
         return record }
+
+    private static Token buildToken(def row) {
+        User user = buildUser(row)
+
+        return new Token(
+            token: row["token"], user: user, expires: row["expires"]) }
 
     public static List<String> unwrapArtists(String artists) {
         return artists.split(';') as List<String> }

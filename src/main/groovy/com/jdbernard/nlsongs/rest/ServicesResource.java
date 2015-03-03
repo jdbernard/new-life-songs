@@ -2,6 +2,7 @@ package com.jdbernard.nlsongs.rest;
 
 import java.util.Date;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -36,6 +37,14 @@ public class ServicesResource {
     Service service) {
         service.setId(serviceId);
         NLSongsContext.songsDB.update(service);
+        return service; }
+
+    @DELETE @Path("/{serviceId}")
+    public Service deleteService(@PathParam("serviceId") int serviceId) {
+        Service service = NLSongsContext.songsDB.findService(serviceId);
+
+        if (service != null) { NLSongsContext.songsDB.delete(service); }
+
         return service; }
 
     @GET @Path("/withSong/{songId}")

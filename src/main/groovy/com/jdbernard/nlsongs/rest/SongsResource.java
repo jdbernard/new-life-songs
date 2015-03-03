@@ -1,6 +1,7 @@
 package com.jdbernard.nlsongs.rest;
 
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -36,6 +37,14 @@ public class SongsResource {
         NLSongsContext.songsDB.update(song);
         return song; }
 
+    @DELETE @Path("/{songId}")
+    public Song deleteSong(@PathParam("songId") int songId) {
+        Song song = NLSongsContext.songsDB.findSong(songId);
+
+        if (song != null) { NLSongsContext.songsDB.delete(song); }
+
+        return song; }
+
     @GET @Path("/forService/{serviceId}")
     public List<Song> getSongsForService(@PathParam("serviceId") int serviceId) {
         return NLSongsContext.songsDB.findSongsForServiceId(serviceId); }
@@ -43,4 +52,5 @@ public class SongsResource {
     @GET @Path("/byArtist/{artist}")
     public List<Song> getSongsForArtist(@PathParam("artist") String artist) {
         return NLSongsContext.songsDB.findSongsByArtist(artist); }
+
 }
