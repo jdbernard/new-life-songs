@@ -13,12 +13,12 @@ import javax.ws.rs.core.MediaType;
 import com.jdbernard.nlsongs.servlet.NLSongsContext;
 import com.jdbernard.nlsongs.model.Song;
 
-@Path("v1/songs")
+@Path("v1/songs") @AllowCors
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
 public class SongsResource {
 
-    @GET
+    @GET @AllowCors
     public List<Song> getSongs() {
         return NLSongsContext.songsDB.findAllSongs(); }
 
