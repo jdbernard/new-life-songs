@@ -10,17 +10,19 @@ repositories {
     mavenCentral() }
 
 dependencies {
+    compile 'ch.qos.logback:logback-classic:1.1.2'
+    compile 'ch.qos.logback:logback-core:1.1.2'
+    compile 'com.impossibl.pgjdbc-ng:pgjdbc-ng:0.3'
+    compile 'com.lambdaworks:scrypt:1.4.0'
+    compile 'com.zaxxer:HikariCP-java6:2.3.2'
+    compile 'javax:javaee-api:7.0'
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
     compile 'org.codehaus.groovy:groovy-all:2.3.6'
     compile 'org.slf4j:slf4j-api:1.7.10'
-    compile 'ch.qos.logback:logback-core:1.1.2'
-    compile 'ch.qos.logback:logback-classic:1.1.2'
-    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
-    compile 'com.zaxxer:HikariCP-java6:2.3.2'
-    compile 'com.impossibl.pgjdbc-ng:pgjdbc-ng:0.3'
-    runtime 'org.glassfish.jersey.media:jersey-media-json-jackson:2.16'
     runtime 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.3.2'
-    providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
     runtime 'org.glassfish.jersey.containers:jersey-container-servlet:2.16'
+    runtime 'org.glassfish.jersey.media:jersey-media-json-jackson:2.16'
+    providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
     testCompile 'junit:junit:4.12'
 
@@ -34,3 +36,60 @@ dependencies {
     compile 'com.mchange:c3p0:0.9.5'
     */
 }
+
+task deployLocal(dependsOn: ['build']) << {
+    def warName = "${project.name}-${version}.war"
+    def jettyHome = System.getenv("JETTY_HOME")
+    def deployedWar = new File("$jettyHome/webapps/$warName")
+
+    if (deployedWar.exists()) deployedWar.delete();
+    copy {
+        from "build/libs"
+        into "$jettyHome/webapps"
+        include warName } }
+
+task killJettyLocal() << {
+    def pidFile = new File(System.properties['user.home'] + "/temp/jetty.pid")
+
+    if (pidFile.exists()) {
+        println "Killing old Jetty instance."
+        shell_(["kill", pidFile.text.trim().split(/\n/)].flatten())
+        pidFile.delete() } }
+
+task localJetty(dependsOn: ['killJettyLocal', 'deployLocal']) << {
+    spawn(["java", "-jar", "start.jar"], new File(jettyHome))
+    shell("sh", "-c",
+        'jps -l | grep start.jar | cut -f 1 -d " " | sort -n | tail -n 1 > ${HOME}/temp/jetty.pid') }
+
+// ## Utilitye methods for working with processes.
+
+def shell_(List<String> cmd) { shell(cmd, null, false) }
+def shell_(String... cmd) { shell(cmd, null, false) }
+def shell(String... cmd) { shell(cmd, null, true) }
+
+def shell(List<String> cmd, File workingDir, boolean checkExit) {
+    shell(cmd as String[], workingDir, checkExit) }
+
+def shell(String[] cmd, File workingDir, boolean checkExit) {
+    def pb = new ProcessBuilder(cmd)
+    if (workingDir) pb.directory(workingDir)
+    def process = pb.start()
+    process.waitForProcessOutput(System.out, System.err)
+
+    if (process.exitValue() != 0)
+        println "Command $cmd exited with non-zero result code."
+    if (checkExit) assert process.exitValue() == 0 : "Not ignoring failed command." }
+
+def shell(List<List<String>> cmds, File workingDir) {
+    cmds.each {
+        ProcessBuilder pb = new ProcessBuilder(it)
+        pb.directory(workingDir)
+        pb.start().waitForProcessOutput(System.out, System.err) } }
+
+def spawn(String... cmd) { spawn(cmd, null) }
+def spawn(List<String> cmd, File workingDir) { spawn(cmd as String[], workingDir) }
+def spawn(String[] cmd, File workingDir) {
+    def pb = new ProcessBuilder(cmd)
+    if (workingDir) pb.directory(workingDir)
+    def process = pb.start() }
+
