@@ -37,6 +37,12 @@ dependencies {
     */
 }
 
+war {
+    from "resources/webapp"
+}
+
+// ## Custom tasks for local deployment
+
 task deployLocal(dependsOn: ['build']) << {
     def warName = "${project.name}-${version}.war"
     def jettyHome = System.getenv("JETTY_HOME")

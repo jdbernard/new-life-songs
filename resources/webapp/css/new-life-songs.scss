@@ -1,0 +1,51 @@
+/**
+ * # New Life Songs DB
+ * @author Jonathan Bernard <jdb@jdb-labs.com>
+ */
+
+
+$dark: #333;
+
+@import "forSize.mixin.scss";
+@import "reset.scss";
+
+body {
+    color: $dark;
+    font-family: Cantarell;
+	margin: 2rem auto;
+	width: 60rem; }
+
+header {
+    position: relative;
+
+    & > h1, & > h2 {
+        font-family: "Roboto Condensed";
+        margin-bottom: 1.5em; }
+        
+    nav {
+        position: absolute;
+        top: 0;
+        right: 0;
+        
+        ul {
+            list-style: none;
+            
+            li {
+                display: block;
+                float: right;
+                padding: 0.4rem 0.6rem;
+
+                a {
+                    color: $dark;
+                    display: block;
+                    padding: 0.1rem 0.4rem;
+                    text-decoration: none; }
+
+                a:hover {
+                    background-color: $dark;
+                    border-radius: 3px;
+                    color: white;
+                }
+            } } } }
+
+th { font-family: "Roboto Condensed"; }
