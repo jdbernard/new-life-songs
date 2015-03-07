@@ -3,21 +3,13 @@
 --
 -- PostgreSQL database creation sript.
 
--- DROP DATABASE IF EXISTS nlsongs;
-CREATE DATABASE nlsongs
-    ENCODING = 'UTF8'
-    LC_COLLATE = 'en_US.UTF-8'
-    LC_CTYPE = 'en_US.UTF-8'
-    CONNECTION LIMIT = 1;
-
-\c nlsongs
-
 -- Services table
 DROP TABLE IF EXISTS services;
 CREATE TABLE IF NOT EXISTS services (
     id SERIAL,
     date DATE NOT NULL,
     service_type VARCHAR(16) DEFAULT NULL,
+    CONSTRAINT uc_serviceTypeAndDate UNIQUE (date, service_type),
     PRIMARY KEY (id));
 
 
@@ -27,6 +19,7 @@ CREATE TABLE IF NOT EXISTS songs (
     id SERIAL,
     name VARCHAR(128) NOT NULL,
     artists VARCHAR(256) DEFAULT NULL,
+    CONSTRAINT uc_songNameAndArtist UNIQUE (name, artists),
     PRIMARY KEY (id));
 
 
@@ -42,8 +35,8 @@ CREATE TABLE IF NOT EXISTS performances (
     guitarist VARCHAR(64) DEFAULT NULL,
     leader VARCHAR(64) DEFAULT NULL,
     PRIMARY KEY (service_id, song_id),
-    FOREIGN KEY (service_id) REFERENCES services (id),
-    FOREIGN KEY (song_id) REFERENCES songs (id));
+    FOREIGN KEY (service_id) REFERENCES services (id) ON DELETE CASCADE,
+    FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE);
 
 
 DROP TABLE IF EXISTS users;

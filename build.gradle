@@ -43,7 +43,7 @@ dependencies {
 
 war { from "resources/webapp" }
 
-test { testLogging { events 'passed', 'failed' } }
+test { testLogging { events 'failed' } }
 
 task testWar(type: War) {
     from 'resources/webapp'
