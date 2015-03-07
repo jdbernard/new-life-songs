@@ -18,6 +18,7 @@ dependencies {
     compile 'com.zaxxer:HikariCP-java6:2.3.2'
     compile 'javax:javaee-api:7.0'
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+    compile 'joda-time:joda-time:2.7'
     compile 'org.codehaus.groovy:groovy-all:2.3.6'
     compile 'org.slf4j:slf4j-api:1.7.10'
     runtime 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.3.2'

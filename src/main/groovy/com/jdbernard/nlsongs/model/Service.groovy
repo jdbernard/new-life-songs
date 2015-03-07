@@ -1,8 +1,28 @@
 package com.jdbernard.nlsongs.model
 
+import org.joda.time.LocalDate
+
 public class Service implements Serializable {
 
     int id
-    Date date
+    private LocalDate date
     ServiceType serviceType
+
+    public boolean equals(Object thatObj) {
+        if (thatObj == null) return false
+        if (!(thatObj instanceof Service)) return false
+
+        Service that = (Service) thatObj
+
+        return (this.id == that.id &&
+                this.date == (that.@date) &&
+                this.serviceType == that.serviceType) }
+
+    public void setDate(Date date) { this.date = LocalDate.fromDateFields(date) }
+
+    public void setDate(LocalDate date) { this.date = date }
+
+    public Date getDate() { return this.date.toDate() }
+
+    public String toString() { return "$id: $date - $serviceType" }
 }
