@@ -51,25 +51,25 @@ public class NLSongsDB {
 
     public List<Service> findServicesAfter(Date d) {
         def sdf = new SimpleDateFormat("YYYY-MM-dd")
-        return sql.rows('SELECT * FROM services WHERE "date" > ?',
+        return sql.rows('SELECT * FROM services WHERE date > ?',
             [sdf.format(d)]).  collect { recordToModel(it, Service) } }
 
     public List<Service> findServicesBefore(Date d) {
         def sdf = new SimpleDateFormat("YYYY-MM-dd")
-        return sql.rows('SELECT * FROM services WHERE "date" < ?',
+        return sql.rows('SELECT * FROM services WHERE date < ?',
             [sdf.format(d)]).collect { recordToModel(it, Service) } }
 
     public List<Service> findServicesBetween(Date b, Date e) {
         def sdf = new SimpleDateFormat("YYYY-MM-dd")
-        return sql.rows('SELECT * FROM services WHERE "date" BETWEEN ? AND ?',
+        return sql.rows('SELECT * FROM services WHERE date BETWEEN ? AND ?',
             [sdf.format(b),sdf.format(e)]).
             collect { recordToModel(it, Service) } }
 
     public Service create(Service service) {
         def sdf = new SimpleDateFormat("YYYY-MM-dd")
         int newId = sql.executeInsert(
-            'INSERT INTO services ("date", service_type) VALUES (?, ?)',
-            [sdf.format(service.date), service.serviceType])[0][0]
+            'INSERT INTO services (date, service_type) VALUES (?, ?)',
+            [sdf.format(service.date), service.serviceType.toString()])[0][0]
 
         service.id = newId
         return service }
@@ -77,8 +77,8 @@ public class NLSongsDB {
     public int update(Service service) {
         def sdf = new SimpleDateFormat("YYYY-MM-dd")
         return sql.executeUpdate(
-            'UPDATE services SET "date" = ?, service_type = ? WHERE id = ?',
-            [sdf.format(service.date), service.serviceType, service.id] ) }
+            'UPDATE services SET date = ?, service_type = ? WHERE id = ?',
+            [sdf.format(service.date), service.serviceType.toString(), service.id] ) }
 
     public int delete(Service service) {
         sql.execute("DELETE FROM services WHERE id = ?", [service.id])
@@ -106,16 +106,15 @@ public class NLSongsDB {
             collect { recordToModel(it, Song) } }
 
     public List<Song> findSongsLikeName(String name) {
-        return sql.rows("SELECT * FROM songs WHERE name LIKE ?", ["%$name%"]).
+        return sql.rows("SELECT * FROM songs WHERE name LIKE '%${name}%'".toString()).
             collect { recordToModel(it, Song) } }
 
     public List<Song> findSongsByArtist(String artist) {
-        return sql.rows("SELECT * FROM songs WHERE artists LIKE ?", ["%$artist%"]).
+        return sql.rows("SELECT * FROM songs WHERE artists LIKE '%${artist}%'".toString()).
             collect { recordToModel(it, Song) } }
 
     public List<Song> findSongsByNameAndArtist(String name, String artist) {
-        return sql.rows("SELECT * FROM songs WHERE name = ? AND artists LIKE ?",
-            [name,"%$artist%"]).collect { recordToModel(it, Song) } }
+        return sql.rows("SELECT * FROM songs WHERE name = '${name}' AND artists LIKE '%${artist}%'".toString()).collect { recordToModel(it, Song) } }
 
     public Song create(Song song) {
         int newId = sql.executeInsert(
@@ -140,6 +139,10 @@ public class NLSongsDB {
             "SELECT * FROM performances WHERE service_id = ? AND song_id = ?",
             [serviceId, songId])
         return recordToModel(perf, Performance) }
+
+    public List<Performance> findAllPerformances() {
+        return sql.rows("SELECT * FROM performances").collect {
+            recordToModel(it, Performance) } }
 
     public List<Performance> findPerformancesForServiceId(int serviceId) {
         return sql.rows("SELECT * FROM performances WHERE service_id = ?",
@@ -178,7 +181,7 @@ public class NLSongsDB {
     public List<User> findAllUsers() {
         return sql.rows("SELECT * FROM users").
             collect { buildUser(it); } }
-        
+
     public User findUser(String username) {
         def row = sql.firstRow("SELECT * FROM users WHERE username = ?",
             [username])
@@ -225,6 +228,11 @@ public class NLSongsDB {
             WHERE t.token = ?""", [token])
         return buildToken(row) }
 
+    public Token findTokenForUser(User user) {
+        def row = sql.firstRow("SELECT * FROM tokens WHERE user_id = ?",
+            [user.id])
+        return buildToken(row, user) }
+
     public Token renewToken(Token token) {
         def foundToken = findToken(token.token);
 
@@ -233,13 +241,13 @@ public class NLSongsDB {
 
         // Otherwise, renew and return the new values.
         assert sql.executeUpdate("UPDATE tokens SET " +
-            "expires = current_timestamp + interval '1 day' WHEREtoken = ?", 
+            "expires = current_timestamp + interval '1 day' WHEREtoken = ?",
             [token.token]) == 1
 
         def updatedToken = findToken(token.token);
         token.expires = updatedToken.expires;
         return token; }
-        
+
     public Token save(Token token) {
         if (findToken(token.token)) {
             update(token); return token }
@@ -266,12 +274,12 @@ public class NLSongsDB {
         def model = clazz.newInstance()
 
         record.each { recordKey, v ->
-            def pts = recordKey.split('_')
+            def pts = recordKey.toLowerCase().split('_')
             def modelKey = pts.length == 1 ? pts[0] :
                 pts[0] + pts[1..-1].collect { it.capitalize() }.join()
 
             // Hacky, there should be a better way
-            if (recordKey == "artists") v = unwrapArtists(v);
+            if (modelKey == "artists") v = unwrapArtists(v);
 
             model[modelKey] = v }
         return model }
@@ -292,14 +300,19 @@ public class NLSongsDB {
             record[recordKey] = v }
         return record }
 
+    private static Token buildToken(def row, User user) {
+        if (!row?.token) return null
+
+        return new Token(
+            token: row["token"], user: user, expires: row["expires"]) }
+
     private static Token buildToken(def row) {
-        if (!row) return null
+        if (!row?.token) return null
 
         User user = buildUser(row)
         assert user != null
 
-        return new Token(
-            token: row["token"], user: user, expires: row["expires"]) }
+        return buildToken(row, user) }
 
     public static List<String> unwrapArtists(String artists) {
         return artists.split(';') as List<String> }
