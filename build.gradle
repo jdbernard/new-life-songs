@@ -1,10 +1,17 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 apply plugin: "groovy"
 apply plugin: "maven"
 apply plugin: "war"
 apply plugin: "jetty"
 
+apply from: 'shell.gradle'
+
 group = "com.jdbernard"
-version = "2.0"
+
+version = new ProjectVersion()
+
+// webAppDirName = "build/webapp/main"
 
 repositories {
     mavenLocal()
@@ -30,26 +37,46 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testRuntime 'com.h2database:h2:1.4.186'
 
-    /*
-    compile 'org.hibernate:hibernate-core:4.3.8.Final'
-    compile 'org.hibernate:hibernate-validator:5.1.3.Final'
-    copmile 'javax.el:javax.el-api:2.2.4'
-    compile 'org.glassfish.web:javax.el:2.2.4'
-    compile 'org.modelmapper:modelmapper:0.7.3'
-    compile 'org.springframework:spring-context:4.1.4.RELEASE'
-    compile 'com.mchange:c3p0:0.9.5'
-    */
 }
 
-war { from "resources/webapp" }
+war { 
+    from "resources/webapp"
+    filter(ReplaceTokens, tokens: [version: version])
+    rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
+    webInf { from 'src/main/webapp/WEB-INF' }
+}
 
 test { testLogging { events 'failed' } }
 
 task testWar(type: War) {
     from 'resources/webapp'
-    webInf { from 'src/test/webapp/WEB-INF' }
-    webXml = file('src/test/webapp/WEB-INF/web.xml')
+    filter(ReplaceTokens, tokens: [version: version])
+    rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
+    webInf { from 'resources/test/webapp/WEB-INF' }
     classifier 'test' }
+
+// ## Build Versioning task
+task incrementBuildNumber(
+    group: 'versioning',
+    description: "Increment the project's build number."
+)  << { ++version.build }
+
+task incrementMinorNumber(
+    group: 'versioning',
+    description: "Increment the project's minor version number."
+)  << { ++version.minor }
+
+task incrementMajorNumber(
+    group: 'versioning',
+    description: "Increment the project's major version number."
+)  << { ++version.major }
+
+task markReleaseBuild(
+    group: 'versioning',
+    description: "Mark this version of the project as a release version."
+)  << { version.release = true }
+
+build.dependsOn << incrementBuildNumber
 
 // ## Custom tasks for local deployment
 
@@ -67,45 +94,55 @@ task deployLocal(dependsOn: ['build']) << {
 task killJettyLocal() << {
     def pidFile = new File(System.properties['user.home'] + "/temp/jetty.pid")
 
-    if (pidFile.exists()) {
-        println "Killing old Jetty instance."
-        shell_(["kill", pidFile.text.trim().split(/\n/)].flatten())
-        pidFile.delete() } }
+    println "Killing old Jetty instance."
+    shell_("sh", "-c", 'kill $(jps -l | grep start.jar | cut -f 1 -d " ")') }
 
 task localJetty(dependsOn: ['killJettyLocal', 'deployLocal']) << {
-    spawn(["java", "-jar", "start.jar"], new File(jettyHome))
-    shell("sh", "-c",
-        'jps -l | grep start.jar | cut -f 1 -d " " | sort -n | tail -n 1 > ${HOME}/temp/jetty.pid') }
+    spawn(["java", "-jar", "start.jar"], new File(jettyHome)) }
 
-// ## Utilitye methods for working with processes.
+// ## Project Version
+class ProjectVersion {
 
-def shell_(List<String> cmd) { shell(cmd, null, false) }
-def shell_(String... cmd) { shell(cmd, null, false) }
-def shell(String... cmd) { shell(cmd, null, true) }
+    private File versionFile
 
-def shell(List<String> cmd, File workingDir, boolean checkExit) {
-    shell(cmd as String[], workingDir, checkExit) }
+    int major
+    int minor
+    int build
+    boolean release
 
-def shell(String[] cmd, File workingDir, boolean checkExit) {
-    def pb = new ProcessBuilder(cmd)
-    if (workingDir) pb.directory(workingDir)
-    def process = pb.start()
-    process.waitForProcessOutput(System.out, System.err)
+    public ProjectVersion() { this(new File('version.properties')) }
 
-    if (process.exitValue() != 0)
-        println "Command $cmd exited with non-zero result code."
-    if (checkExit) assert process.exitValue() == 0 : "Not ignoring failed command." }
+    public ProjectVersion(File versionFile) {
+        this.versionFile = versionFile
 
-def shell(List<List<String>> cmds, File workingDir) {
-    cmds.each {
-        ProcessBuilder pb = new ProcessBuilder(it)
-        pb.directory(workingDir)
-        pb.start().waitForProcessOutput(System.out, System.err) } }
+        if (!versionFile.exists()) {
+            versionFile.createNewFile()
+            this.major = this.minor = this.build = 0
+            this.save() }
 
-def spawn(String... cmd) { spawn(cmd, null) }
-def spawn(List<String> cmd, File workingDir) { spawn(cmd as String[], workingDir) }
-def spawn(String[] cmd, File workingDir) {
-    def pb = new ProcessBuilder(cmd)
-    if (workingDir) pb.directory(workingDir)
-    def process = pb.start() }
+        else this.load() }
 
+    @Override String toString() { "$major.$minor${release ? '' : '-build' + build}" }
+
+    public void setMajor(int major) {
+        this.major = major; minor = build = 0; release = false; save() }
+
+    public void setMinor(int minor) {
+        this.minor = minor; build = 0; release = false; save() }
+
+    public void setBuild(int build) { this.build = build; save() }
+
+    private void save() {
+        def props = new Properties()
+        versionFile.withInputStream { props.load(it) }
+        ["major", "minor", "build"].each { props[it] = this[it].toString() }
+        props["version.release"] = release.toString()
+        versionFile.withOutputStream { props.store(it, "") } }
+
+    private void load() {
+        def props = new Properties()
+        versionFile.withInputStream { props.load(it) }
+        ["major", "minor", "build"].each {
+            this[it] = props[it] ? props[it] as int : 0 }
+        release = Boolean.parseBoolean(props["version.release"]) }
+}

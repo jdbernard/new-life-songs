@@ -85,7 +85,7 @@ public class NLSongsDBTest {
 
         // Create Hikari datasource
         HikariConfig hcfg = new HikariConfig(
-            "src/test/webapp/WEB-INF/classes/datasource.test.properties")
+            "resources/test/WEB-INF/classes/datasource.test.properties")
 
         HikariDataSource dataSource = new HikariDataSource(hcfg)
 
