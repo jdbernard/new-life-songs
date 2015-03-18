@@ -35,9 +35,51 @@
         <servlet-class>groovy.servlet.TemplateServlet</servlet-class>    
     </servlet>
 
+    <servlet>
+        <servlet-name>SongViewServlet</servlet-name>
+        <servlet-class>groovy.servlet.TemplateServlet</servlet-class>    
+
+        <init-param>
+            <param-name>resource.name.regex</param-name>
+            <param-value>/song/?.*</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>resource.name.replacement</param-name>
+            <param-value>/song/index.gsp</param-value>
+        </init-param>
+
+    </servlet>
+
+    <servlet>
+        <servlet-name>ServiceViewServlet</servlet-name>
+        <servlet-class>groovy.servlet.TemplateServlet</servlet-class>    
+
+        <init-param>
+            <param-name>resource.name.regex</param-name>
+            <param-value>/service/?.*</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>resource.name.replacement</param-name>
+            <param-value>/service/index.gsp</param-value>
+        </init-param>
+
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>New Life Songs REST API</servlet-name>
         <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SongViewServlet</servlet-name>
+        <url-pattern>/song/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ServiceViewServlet</servlet-name>
+        <url-pattern>/service/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
