@@ -21,12 +21,16 @@
 
     /// ### SongsView
     NLS.SongsView = Backbone.View.extend({
+        el: $("#songs-table")[0],
 
+        initialize: function(options) { this.$el.dataTables(); }
     });
 
     /// ### ServicesView
     NLS.ServicesView = Backbone.View.extend({
+        el: $("#services-table")[0],
 
+        initialize: function(options) { this.$el.dataTables(); }
     });
 
 })();

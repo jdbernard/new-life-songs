@@ -41,9 +41,11 @@ dependencies {
 
 war { 
     from "resources/webapp"
+    from "build/webapp"
     filter(ReplaceTokens, tokens: [version: version])
     rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
-    webInf { from 'src/main/webapp/WEB-INF' }
+    version = project.version.releaseVersion
+    webInf { from 'resources/main/WEB-INF' }
 }
 
 test { testLogging { events 'failed' } }
@@ -52,9 +54,22 @@ task testWar(type: War) {
     from 'resources/webapp'
     filter(ReplaceTokens, tokens: [version: version])
     rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
-    webInf { from 'resources/test/webapp/WEB-INF' }
+    version = project.version.releaseVersion
+    webInf { from 'resources/test/WEB-INF' }
     classifier 'test' }
 
+task compileScss(
+    group: 'build',
+    description: 'Compile SCSS files into CSS.',
+    type: Exec
+) {
+    executable "scss"
+    args "--update", "src/main/webapp/css:build/webapp/css"
+}
+
+war.dependsOn compileScss
+testWar.dependsOn compileScss
+    
 // ## Build Versioning task
 task incrementBuildNumber(
     group: 'versioning',
@@ -76,12 +91,13 @@ task markReleaseBuild(
     description: "Mark this version of the project as a release version."
 )  << { version.release = true }
 
-build.dependsOn << incrementBuildNumber
+war.dependsOn << incrementBuildNumber
+testWar.dependsOn << incrementBuildNumber
 
 // ## Custom tasks for local deployment
 
 task deployLocal(dependsOn: ['build']) << {
-    def warName = "${project.name}-${version}.war"
+    def warName = "${project.name}-${version.releaseVersion}.war"
     def jettyHome = System.getenv("JETTY_HOME")
     def deployedWar = new File("$jettyHome/webapps/$warName")
 
@@ -123,6 +139,8 @@ class ProjectVersion {
         else this.load() }
 
     @Override String toString() { "$major.$minor${release ? '' : '-build' + build}" }
+
+    public String getReleaseVersion() { "$major.$minor" }
 
     public void setMajor(int major) {
         this.major = major; minor = build = 0; release = false; save() }

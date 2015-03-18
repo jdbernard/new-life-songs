@@ -48,4 +48,10 @@ header {
                 }
             } } } }
 
-th { font-family: "Roboto Condensed"; }
+table {
+
+    th { font-family: "Roboto Condensed"; }
+    td a {
+        color: $dark;
+        display: block;
+        text-decoration: none; } }
