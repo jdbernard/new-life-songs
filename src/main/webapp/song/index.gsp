@@ -18,6 +18,8 @@ if (!song) { response.sendError(response.SC_NOT_FOUND); return }
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <meta name="referrer" content="origin">
         <link rel="shortcut icon" href="../images/favicon.ico">
 
         <title><%= song.name %> - New Life Songs Database</title>
@@ -27,14 +29,15 @@ if (!song) { response.sendError(response.SC_NOT_FOUND); return }
         <script type="application/javascript" src="https://cdn.datatables.net/1.10.5/js/jquery.dataTables.js"></script>
         <!--<script type="application/javascript" src="https://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>-->
         <!--<script type="application/javascript" src="../js/new-life-songs-@version@.js"></script>-->
-        <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed|Roboto|Lato|Cuprum|Dosis|Cantarell' rel='stylesheet' type='text/css'>
+        <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed|Cantarell' rel='stylesheet' type='text/css'>
         <link href='http://cdn.datatables.net/1.10.5/css/jquery.dataTables.css' rel='stylesheet' type='text/css'>
         <link href='../css/new-life-songs-@version@.css' rel='stylesheet' type='text/css'>
     </head>
     <body>
         <header>
-            <h1>New Life Songs</h1>
-            <h2><%= song.name %></h2><%
+            <h1><a href="../">New Life Songs</a></h1>
+            <h2 class=song-name><%= song.name %></h2><%
             if (song.artists.findAll().size() > 0) {
             %><h3>by <%= song.artists.join(", ") %></h3> <% } %>
 
@@ -48,48 +51,37 @@ if (!song) { response.sendError(response.SC_NOT_FOUND); return }
             <h2>Performances</h2>
             <table id=performances-table class="row-border dataTable hover compact" cellspacing=0>
                 <thead><tr>
-                        <th class="dt-left">Date</th>
-                        <th class="dt-left">Service Type</th>
-                        <th class="dt-left">Worship Leader</th>
-                        <th class="dt-left">Piano</th>
-                        <th class="dt-left">Organ</th>
-                        <th class="dt-left">Bass</th>
-                        <th class="dt-left">Drums</th>
-                        <th class="dt-left">Guitar</th>
+                        <th class=actions />
+                        <th class="dt-left performance-date">Date</th>
+                        <th class="dt-left service-type">Service Type</th>
+                        <th class="dt-left not-small">Worship Leader</th>
+                        <th class="dt-left not-small">Piano</th>
+                        <th class="dt-left not-small">Organ</th>
+                        <th class="dt-left not-small">Bass</th>
+                        <th class="dt-left not-small">Drums</th>
+                        <th class="dt-left not-small">Guitar</th>
                 </tr></thead>
                 <tbody>
                 <% songsDB.findPerformancesForSongId(song.id).
                     collect { [perf: it, svc: songsDB.findService(it.serviceId)] }.
                     sort { it.svc.date }.each { row -> %>
-                    <tr><td><a href='../service/<%= row.svc.id %>'><%= 
+                    <tr><td class=actions><a href='<%= NLSongsContext.makeUrl(row.svc, song) %>'><i class="fa fa-download"></i></a></td>
+                        <td class=performance-date><a href='../service/<%= row.svc.id %>'><%= 
                                 row.svc.@date.toString("yyyy-MM-dd") %></a></td>
-                        <td><% switch (row.svc.serviceType) {
-                            case SUN_PM: out.print("Sunday PM"); break
-                            case SUN_AM: out.print("Sunday AM"); break
-                            case WED: out.print("Wednesday"); break }
-                            %></td>
-                        <td><%= row.perf.leader ?: "" %></td>
-                        <td><%= row.perf.pianist ?: "" %></td>
-                        <td><%= row.perf.organist ?: "" %></td>
-                        <td><%= row.perf.bassist ?: "" %></td>
-                        <td><%= row.perf.drummer ?: "" %></td>
-                        <td><%= row.perf.guitarist ?: "" %></td></tr><% } %>
+                        <td class=service-type><%= row.svc.serviceType.displayName %></td>
+                        <td class=not-small><%= row.perf.leader ?: "" %></td>
+                        <td class=not-small><%= row.perf.pianist ?: "" %></td>
+                        <td class=not-small><%= row.perf.organist ?: "" %></td>
+                        <td class=not-small><%= row.perf.bassist ?: "" %></td>
+                        <td class=not-small><%= row.perf.drummer ?: "" %></td>
+                        <td class=not-small><%= row.perf.guitarist ?: "" %></td></tr><% } %>
                 </tbody>
-                <tfoot><tr>
-                        <th class="dt-left">Date</th>
-                        <th class="dt-left">Service Type</th>
-                        <th class="dt-left">Worship Leader</th>
-                        <th class="dt-left">Piano</th>
-                        <th class="dt-left">Organ</th>
-                        <th class="dt-left">Bass</th>
-                        <th class="dt-left">Drums</th>
-                        <th class="dt-left">Guitar</th>
-                </tr></tfoot>
             </table>
         </section>
 
         <script type="application/javascript">
-            window.onload = function() { \$("#performances-table").dataTable(); };
+            window.onload = function() { \$("#performances-table").
+                dataTable({ "paging": false }); };
         </script>
     </body>
 

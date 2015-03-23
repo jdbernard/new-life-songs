@@ -6,52 +6,127 @@
 
 $dark: #333;
 
+$monoFont: 'Anonymous Pro';
+$headFont: 'Roboto Condensed';
+$bodyFont: 'Cantarell';
+
 @import "forSize.mixin.scss";
 @import "reset.scss";
 
 body {
     color: $dark;
-    font-family: Cantarell;
-	margin: 2rem auto;
-	width: 60rem; }
+    font-family: $bodyFont; }
 
 header {
-    position: relative;
 
-    & > h1, & > h2 {
-        font-family: "Roboto Condensed";
-        margin-bottom: 1.5em; }
-        
-    nav {
-        position: absolute;
-        top: 0;
-        right: 0;
-        
-        ul {
-            list-style: none;
-            
-            li {
-                display: block;
-                float: right;
-                padding: 0.4rem 0.6rem;
+    & > h1 > a {
+        color: $dark;
+        text-decoration: none; }
 
-                a {
-                    color: $dark;
-                    display: block;
-                    padding: 0.1rem 0.4rem;
-                    text-decoration: none; }
+    &> h1, & > h2 { font-family: $headFont; }
 
-                a:hover {
-                    background-color: $dark;
-                    border-radius: 3px;
-                    color: white;
-                }
-            } } } }
+    nav > ul > li > a {
+        color: $dark;
+        display: block;
+        padding: 0.1rem 0.4rem;
+        text-decoration: none;
+
+        &:hover, &.current {
+            background-color: $dark;
+            border-radius: 3px;
+            color: white; }  }
+}
+
+p { margin-top: 1rem; }
+
+section {
+    margin-bottom: 2rem;
+
+    & > ul {
+        padding: 1rem 2rem;
+
+        a { color: $dark; }
+        a:visited { color: $dark; } } }
+
+section#welcome { padding: 1rem; }
 
 table {
 
-    th { font-family: "Roboto Condensed"; }
+    th { font-family: $headFont; }
     td a {
         color: $dark;
         display: block;
         text-decoration: none; } }
+
+.api-doc {
+    pre, code {
+        background-color: #EEE;
+        font-family: $monoFont; }
+
+    pre { margin-left: 1rem; }
+
+    h3 { margin: 1rem 0; }
+
+    dl {
+        margin: 1rem;
+
+        & > dt {
+            background-color: #EEE;
+            font-family: $monoFont;
+            font-weight: bold; }
+
+        & > dd { padding: 0 0 0.5rem 1rem; } } }
+
+@include forSize(notSmall) {
+
+    body { margin: 2rem auto; }
+
+    header {
+        position: relative;
+
+        & > h1, & > h2 { margin-bottom: 1.5em; }
+
+        nav {
+            position: absolute;
+            top: 0;
+            right: 0;
+
+            ul {
+                list-style: none;
+
+                li {
+                    display: block;
+                    float: right;
+                    padding: 0.4rem 0.6rem;
+
+                } } } }
+
+}
+
+@include forSize(small) {
+    header {
+        margin-bottom: 1rem;
+        text-align: center;
+
+        & > h2 { display: none; }
+        & > h2.song-name, & > h2.service-date { display: block; }
+
+        & > nav > ul > li {
+            display: inline-block;
+            font-size: 125%;
+            width: 32%;
+        } }
+
+    section { font-size: 125%; }
+
+    .dataTables_length { display: none; }
+
+    table#songs-table {
+        td.artists, th.artists { display: none; } }
+
+    .not-small { display: none; }
+}
+
+@include forSize(medium) { body { width: 40rem; } }
+
+@include forSize(large) { body { width: 60rem; } }
