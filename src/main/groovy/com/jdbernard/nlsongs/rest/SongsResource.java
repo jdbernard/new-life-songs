@@ -1,6 +1,8 @@
 package com.jdbernard.nlsongs.rest;
 
 import java.util.List;
+import javax.annotation.security.RolesAllowed;
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -19,11 +21,11 @@ import com.jdbernard.nlsongs.model.Song;
 @Consumes({MediaType.APPLICATION_JSON})
 public class SongsResource {
 
-    @GET @AllowCors
+    @GET
     public List<Song> getSongs() {
         return NLSongsContext.songsDB.findAllSongs(); }
 
-    @POST
+    @POST @RolesAllowed("admin")
     public Song postSong(Song song) {
         return NLSongsContext.songsDB.create(song); }
 
@@ -31,13 +33,13 @@ public class SongsResource {
     public Song getSong(@PathParam("songId") int songId) {
         return NLSongsContext.songsDB.findSong(songId); }
 
-    @PUT @Path("/{songId}")
+    @PUT @Path("/{songId}") @RolesAllowed("admin")
     public Song putSong(@PathParam("songId") int songId, Song song) {
         song.setId(songId);
         NLSongsContext.songsDB.update(song);
         return song; }
 
-    @DELETE @Path("/{songId}")
+    @DELETE @Path("/{songId}") @RolesAllowed("admin")
     public Song deleteSong(@PathParam("songId") int songId) {
         Song song = NLSongsContext.songsDB.findSong(songId);
 
