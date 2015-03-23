@@ -46,6 +46,7 @@ war {
     rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
     version = project.version.releaseVersion
     webInf { from 'resources/main/WEB-INF' }
+    exclude "**/.*.swp", "**/.sass-cache"
 }
 
 test { testLogging { events 'failed' } }
@@ -141,6 +142,8 @@ class ProjectVersion {
     @Override String toString() { "$major.$minor${release ? '' : '-build' + build}" }
 
     public String getReleaseVersion() { "$major.$minor" }
+
+    public void setRelease(boolean release) { this.release = release; save() }
 
     public void setMajor(int major) {
         this.major = major; minor = build = 0; release = false; save() }
