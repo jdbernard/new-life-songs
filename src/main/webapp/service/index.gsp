@@ -21,7 +21,7 @@ if (!service) { response.sendError(response.SC_NOT_FOUND); return }
         <link rel="shortcut icon" href="../images/favicon.ico">
 
         <title><%= service.@date.toString("yyyy-MM-dd")
-           %> (<%= service.serviceType%>) - New Life Songs Database</title>
+           %> (<%= service.serviceType.displayName %>) - New Life Songs Database</title>
         <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <!--<script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"></script>-->
         <!--<script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>-->
@@ -34,9 +34,9 @@ if (!service) { response.sendError(response.SC_NOT_FOUND); return }
     </head>
     <body>
         <header>
-            <h1>New Life Songs</h1>
-            <h2><%= service.@date.toString("yyyy-MM-dd") %> (<%=
-                    service.serviceType %>)</h2>
+            <h1><a href="../">New Life Songs</a></h1>
+            <h2 class=service-date><%= service.@date.toString("yyyy-MM-dd") %> (<%=
+                    service.serviceType.displayName %>)</h2>
 
             <nav><ul>
                 <li><a href="../admin/">Admin</a></li>
