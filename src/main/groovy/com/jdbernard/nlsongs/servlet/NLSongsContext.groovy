@@ -8,9 +8,10 @@ public class NLSongsContext {
 
     public static NLSongsDB songsDB
     
-    public static String mediaUrlBase
+    public static String mediaBaseUrl
 
     public static String makeUrl(Service service, Song song) {
-        return mediaUrlBase + service.@date.toString('yyyy-MM-dd') +
-            '/' + song.name.replaceAll(/\s/, '') + '.ogg' }
+        return mediaBaseUrl + '/' + service.@date.toString('yyyy-MM-dd') + '_' +
+            service.serviceType.name().toLowerCase() + '_' +
+            song.name.replaceAll(/[\s'"\\\/\?!]/, '') + '.ogg' }
 }

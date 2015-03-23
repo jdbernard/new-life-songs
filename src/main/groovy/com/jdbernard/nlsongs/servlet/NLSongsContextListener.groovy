@@ -14,9 +14,15 @@ public final class NLSongsContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent event) {
         def context = event.servletContext
 
+        // Load the context configuration.
+        Properties props = new Properties()
+        NLSongsContextListener.getResourceAsStream(
+            context.getInitParameter('context.config.file')).withStream { is ->
+                props.load(is) }
+
         // Create the pooled data source
         HikariConfig hcfg = new HikariConfig(
-            context.getInitParameter("context.config.file"))
+            context.getInitParameter('datasource.config.file'))
 
         HikariDataSource hds = new HikariDataSource(hcfg)
 
@@ -24,7 +30,8 @@ public final class NLSongsContextListener implements ServletContextListener {
         NLSongsDB songsDB = new NLSongsDB(hds)
 
         context.setAttribute('songsDB', songsDB)
-        NLSongsContext.songsDB = songsDB }
+        NLSongsContext.songsDB = songsDB
+        NLSongsContext.mediaBaseUrl = props["nlsongs.media.baseUrl"] }
 
     public void contextDestroyed(ServletContextEvent event) {
         def context = event.servletContext
