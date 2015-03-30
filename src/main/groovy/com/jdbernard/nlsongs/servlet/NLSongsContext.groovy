@@ -13,5 +13,5 @@ public class NLSongsContext {
     public static String makeUrl(Service service, Song song) {
         return mediaBaseUrl + '/' + service.@date.toString('yyyy-MM-dd') + '_' +
             service.serviceType.name().toLowerCase() + '_' +
-            song.name.replaceAll(/[\s'"\\\/\?!]/, '') + '.ogg' }
+            song.name.replaceAll(/[\s'"\\\/\?!]/, '') + '.mp3' }
 }
