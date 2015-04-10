@@ -21,8 +21,8 @@
         </header>
         <section id=api-overview>
             The New Life Songs database exposes a REST API. This allows
-            programatic access and modification to the data. Version 1 of the
-            API defines several endpoints, all of which are built off of
+            programatic access to and modification of the data. Version 1 of
+            the API defines several endpoints, all of which are built off of
             <code>http://newlifesongs.jdbernard.com/api/v1</code> as a base
             URL.
 
@@ -64,6 +64,46 @@
     "Michael W. Smith"
   ]
 }</pre>
+            <h3>Method Summary</h3>
+            <table class=method-summary>
+                <thead>
+                    <tr><th class=action>HTTP Action</th>
+                        <th class=path>Path</th>
+                        <th class=desc>Description</th>
+                        <th class=public>Public?</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class=action>GET</td>
+                        <td class=path><code>/songs</code></td>
+                        <td class=desc>Retrieve all songs.</td>
+                        <td class=public>yes</td></tr>
+                    <tr><td class=acion>POST</td>
+                        <td class=path><code>/songs</code></td>
+                        <td class=desc>Create a new song record.</td>
+                        <td class=public>no</td></tr>
+                    <tr><td class=acion>GET</td>
+                        <td class=path><code>/songs/&lt;songId&gt;</code></td>
+                        <td class=desc>Retrieve a single record.</td>
+                        <td class=public>yes</td></tr>
+                    <tr><td class=acion>PUT</td>
+                        <td class=path><code>/songs/&lt;songId&gt;</code></td>
+                        <td class=desc>Update a song record.</td>
+                        <td class=public>no</td></tr>
+                    <tr><td class=acion>DELETE</td>
+                        <td class=path><code>/songs/&lt;songId&gt;</code></td>
+                        <td class=desc>Delete a song record.</td>
+                        <td class=public>no</td></tr>
+                    <tr><td class=acion>GET</td>
+                        <td class=path><code>/songs/forService/&lt;serviceId&gt;</code></td>
+                        <td class=desc>Retrieve all songs performed in a given service.</td>
+                        <td class=public>yes</td></tr>
+                    <tr><td class=acion>GET</td>
+                        <td class=path><code>/songs/byArtist/&lt;artist&gt;</code></td>
+                        <td class=desc>Retrieve all songs performed by a given artist.</td>
+                        <td class=public>yes</td></tr>
+                </tbody>
+            </table>
+
             <ul class=method-list>
             <li><h3><code>GET /songs</code></h3>
 
@@ -71,7 +111,7 @@
                 <p><h4>Response</h4>
                 A list of <a href="song-object">song objects</a>
 
-                <h4>Example</h4>
+                <p><h4>Example</h4>
                 <pre>
 GET http://newlifesongs.jdbernard.com/api/v1/songs</pre>
 <p><pre>
@@ -105,6 +145,80 @@ Server: Jetty(6.1.25)
                 The newly-created song record.
 
                 <p><h4>Example</h4>
+                <pre>
+                </pre></li>
+
+            <li><h3><code>GET /songs/&lt;songId&gt;</code></h3>
+
+                <p>Retrieve song data for the given song id.
+
+                <p><h4>Response</h4>
+                A <a href="song-object">song object</a>.
+
+                <p><h4>Example</h4>
+                <pre>
+                </pre></li>
+            </li>
+
+            <li><h3><code>PUT /songs/&lt;songId&gt;</code></h3>
+
+                <p>Method description
+                <p><h4>Request Body</h4>
+                Request body description
+
+                <p><h4>Response</h4>
+                Return value description
+
+                <p><h4>Example</h4>
+                <pre>
+                </pre></li>
+
+            </li>
+
+            <li><h3><code>DELETE /songs/&lt;songId&gt;</code></h3>
+
+                <p>Method description
+                <p><h4>Request Body</h4>
+                Request body description
+
+                <p><h4>Response</h4>
+                Return value description
+
+                <p><h4>Example</h4>
+                <pre>
+                </pre></li>
+
+            </li>
+
+            <li><h3><code>GET /songs/forService/&lt;serviceId&gt;</code></h3>
+
+                <p>Method description
+                <p><h4>Request Body</h4>
+                Request body description
+
+                <p><h4>Response</h4>
+                Return value description
+
+                <p><h4>Example</h4>
+                <pre>
+                </pre></li>
+
+            </li>
+
+            <li><h3><code>DELETE /songs/byArtist/&lt;artist&gt;</code></h3>
+
+                <p>Method description
+                <p><h4>Request Body</h4>
+                Request body description
+
+                <p><h4>Response</h4>
+                Return value description
+
+                <p><h4>Example</h4>
+                <pre>
+                </pre></li>
+
+            </li>
 
         </section>
         <section id=services>

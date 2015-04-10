@@ -65,7 +65,11 @@ table {
 
     pre { margin-left: 1rem; }
 
-    h3 { margin: 1rem 0; }
+    h2 {
+        border-bottom: solid 2px $dark;
+        margin-top: 2em; }
+
+    h3 { margin: 2rem 0 1rem 0; }
 
     dl {
         margin: 1rem;
@@ -75,7 +79,20 @@ table {
             font-family: $monoFont;
             font-weight: bold; }
 
-        & > dd { padding: 0 0 0.5rem 1rem; } } }
+        & > dd { padding: 0 0 0.5rem 1rem; } }
+
+    table.method-summary {
+        padding: 0 2rem;
+        width: 100%;
+
+        th { 
+            border-bottom: solid thin $dark;
+            text-align: left; }
+
+        th.action, td.action { width: 6em; } 
+        th.path, td.path { width: 17em; } 
+        th.public, td.public { width: 4em; } 
+    } }
 
 @include forSize(notSmall) {
 
