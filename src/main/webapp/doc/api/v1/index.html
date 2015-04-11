@@ -116,17 +116,17 @@
 GET http://newlifesongs.jdbernard.com/api/v1/songs</pre>
 <p><pre>
 HTTP/1.1 200 OK
-Content-Length: 5146
+Content-Length: 433
 Content-Type: application/json
 Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
-Server: Jetty(6.1.25)
 
 [{"id":1,"name":"Welcome Holy Spirit","artists":["Mark Condon"]},
  {"id":3,"name":"Let's Sing Praises to our God","artists":["Traditional"]},
  {"id":5,"name":"Blessed Assurance","artists":["Frances J. Crosby"]},
  {"id":8,"name":"Here I Am To Worship","artists":["Tim Hughes", "Chris Tomlin", "Michael W.  Smith"]},
  {"id":12,"name":"Healer","artists":["Kari Jobe", "Hillsong"]},
- {"id":15,"name":"I Am Free","artists":["Newsboys"]}]</pre></li>
+ {"id":15,"name":"I Am Free","artists":["Newsboys"]}]
+ </pre></li>
 
             <li><h3><code>POST /songs</code></h3>
 
@@ -157,7 +157,15 @@ Server: Jetty(6.1.25)
 
                 <p><h4>Example</h4>
                 <pre>
-                </pre></li>
+GET http://newlifesongs.jdbernard.com/api/v1/songs/1</pre>
+<p><pre>
+HTTP/1.1 200 OK
+Content-Length: 63
+Content-Type: application/json
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+
+{"id":1,"name":"Welcome Holy Spirit","artists":["Mark Condon"]}
+</pre></li>
             </li>
 
             <li><h3><code>PUT /songs/&lt;songId&gt;</code></h3>
@@ -201,11 +209,22 @@ Server: Jetty(6.1.25)
 
                 <p><h4>Example</h4>
                 <pre>
+GET /api/v1/songs/forService/1 HTTP/1.1</pre>
+<p><pre>
+HTTP/1.1 200 OK
+Content-Length: 256
+Content-Type: application/json
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+
+[{"id":7,"name":"Mighty God","artists":[""]},
+ {"id":8,"name":"Here I Am To Worship","artists":["Tim Hughes: Chris Tomlin, Michael W.  Smith"]},
+ {"id":9,"name":"Worthy","artists":[""]},
+ {"id":4,"name":"I Am A Friend Of God","artists":["Israel Houghton"]}]j
                 </pre></li>
 
             </li>
 
-            <li><h3><code>DELETE /songs/byArtist/&lt;artist&gt;</code></h3>
+            <li><h3><code>GET /songs/byArtist/&lt;artist&gt;</code></h3>
 
                 <p>Method description
                 <p><h4>Request Body</h4>
@@ -223,6 +242,88 @@ Server: Jetty(6.1.25)
         </section>
         <section id=services>
             <h2><code>/services</code></h2>
+
+            <h3 id=service-object>Service object</h3>
+            A Service object is defined with the following fields:
+            <dl><dt>id</dt>
+                <dd>An identifier unique to this service record among all
+                service records. <em>Type: integer</em></dd>
+
+                <dt>date</dt>
+                <dd>The date of the service. <em>Type: Date</em></dd>
+
+                <dt>serviceType</dt>
+                <dd>Service type. <em>Type: string</em> Valid values:
+                    <table><thead><tr><th>Value</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>SUN_AM</code></td>
+                                <td>Sunday morning service.</td></tr>
+                            <tr><td><code>SUN_PM</code></td>
+                                <td>Sunday evening service</td></tr>
+                            <tr><td><code>WED</code></td>
+                                <td>Wednesday, midweek Bible study.</td></tr>
+                        </tbody>
+                    </table>
+                </dd>
+            </dl>
+
+            <h4>Example</h4>
+            <pre>
+{
+  "id": 1,
+  "date": 1235887200000,
+  "serviceType": "SUN_PM"
+}</pre>
+
+            <h3>Method Summary</h3>
+            <table class=method-summary>
+                <thead>
+                    <tr><th class=action>HTTP Action</th>
+                        <th class=path>Path</th>
+                        <th class=desc>Description</th>
+                        <th class=public>Public?</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class=action>GET</td>
+                        <td class=path><code>/services</code></td>
+                        <td class=desc>Retrieve all services.</td>
+                        <td class=public>yes</td></tr>
+                    <tr><td class=acion>POST</td>
+                        <td class=path><code>/services</code></td>
+                        <td class=desc>Create a new service record.</td>
+                        <td class=public>no</td></tr>
+                    <tr><td class=acion>GET</td>
+                        <td class=path><code>/services/&lt;serviceId&gt;</code></td>
+                        <td class=desc>Retrieve a single service record.</td>
+                        <td class=public>yes</td></tr>
+                    <tr><td class=acion>PUT</td>
+                        <td class=path><code>/services/&lt;serviceId&gt;</code></td>
+                        <td class=desc>Update a service record.</td>
+                        <td class=public>no</td></tr>
+                    <tr><td class=acion>DELETE</td>
+                        <td class=path><code>/services/&lt;serviceId&gt;</code></td>
+                        <td class=desc>Delete a service record.</td>
+                        <td class=public>no</td></tr>
+                    <tr><td class=acion>GET</td>
+                        <td class=path><code>/services/withSong/&lt;serviceId&gt;</code></td>
+                        <td class=desc>Retrieve all services in which the given song was performed.</td>
+                        <td class=public>yes</td></tr>
+                    <tr><td class=acion>GET</td>
+                        <td class=path><code>/services/byDate/after/&lt;date&gt;</code></td>
+                        <td class=desc>Retrieve all services after the given date.</td>
+                        <td class=public>yes</td></tr>
+                    <tr><td class=acion>GET</td>
+                        <td class=path><code>/services/byDate/before/&lt;date&gt;</code></td>
+                        <td class=desc>Retrieve all services before the given date.</td>
+                        <td class=public>yes</td></tr>
+                    <tr><td class=acion>GET</td>
+                        <td class=path><code>/services/byDate/between/&lt;date1&gt;/&lt;date2&gt;</code></td>
+                        <td class=desc>Retrieve all services between the two given dates.</td>
+                        <td class=public>yes</td></tr>
+                </tbody>
+            </table>
+
+
         </section>
         <section id=users>
             <h2><code>/users</code></h2>
