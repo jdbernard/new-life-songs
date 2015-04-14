@@ -38,8 +38,8 @@ if (!service) { response.sendError(response.SC_NOT_FOUND); return }
     <body>
         <header>
             <h1><a href="../">New Life Songs</a></h1>
-            <h2 class=service-date><%= service.@date.toString("yyyy-MM-dd") %> (<%=
-                    service.serviceType.displayName %>)</h2>
+            <h2 class=service-desc><%= service.@date.toString("yyyy-MM-dd") %>: (<%=
+                    service.description ?: service.serviceType.displayName %>)</h2>
 
             <nav><ul>
                 <li><a href="../admin/">Admin</a></li>

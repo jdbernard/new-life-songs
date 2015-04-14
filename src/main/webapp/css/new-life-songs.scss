@@ -126,7 +126,7 @@ table {
         text-align: center;
 
         & > h2 { display: none; }
-        & > h2.song-name, & > h2.service-date { display: block; }
+        & > h2.song-name, & > h2.service-desc { display: block; }
 
         & > nav > ul > li {
             display: inline-block;

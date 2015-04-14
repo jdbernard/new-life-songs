@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS services (
     id SERIAL,
     date DATE NOT NULL,
     service_type VARCHAR(16) DEFAULT NULL,
+    description VARCHAR(255) DEFAULT NULL,
     CONSTRAINT uc_serviceTypeAndDate UNIQUE (date, service_type),
     PRIMARY KEY (id));
 

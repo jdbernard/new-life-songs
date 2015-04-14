@@ -45,7 +45,8 @@ songsDB = NLSongsContext.songsDB
                 <% songsDB.findAllServices().sort { it.date }.reverse().each { service -> %>
                     <tr><td class=date><a href="../service/<%= service.id %>"><%=
                             service.@date.toString("yyyy-MM-dd") %></a></td>
-                        <td class=service-type><%= service.serviceType.displayName %></td></tr><% } %>
+                        <td class=service-type><%= service.description ?:
+                            service.serviceType.displayName %></td></tr><% } %>
                 </tbody>
                 <!--<tfoot><tr>
                         <th class="dt-left">Date</th>

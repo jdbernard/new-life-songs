@@ -7,6 +7,7 @@ public class Service implements Serializable {
     int id
     private LocalDate date
     ServiceType serviceType
+    String description
 
     public boolean equals(Object thatObj) {
         if (thatObj == null) return false
