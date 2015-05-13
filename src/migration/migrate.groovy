@@ -5,8 +5,7 @@ import com.jdbernard.nlsongs.model.*
 import java.text.SimpleDateFormat
 
 sdf = new SimpleDateFormat('yyyy-MM-dd')
-hcfg = new
-HikariConfig("/home/jdbernard/projects/new-life-songs/src/main/webapp/WEB-INF/classes/datasource.properties")
+hcfg = new HikariConfig("/home/jdbernard/projects/new-life-songs/src/main/webapp/WEB-INF/classes/datasource.properties")
 
 makeService = { svcRow ->
   Service svc = new Service()
