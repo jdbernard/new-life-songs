@@ -42,9 +42,9 @@ dependencies {
 war { 
     from "resources/webapp"
     from "build/webapp"
+    version = project.version.releaseVersion
     filter(ReplaceTokens, tokens: [version: version])
     rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
-    version = project.version.releaseVersion
     webInf { from 'resources/main/WEB-INF' }
     exclude "**/.*.swp", "**/.sass-cache"
 }
@@ -53,9 +53,9 @@ test { testLogging { events 'failed' } }
 
 task testWar(type: War) {
     from 'resources/webapp'
+    version = project.version.releaseVersion
     filter(ReplaceTokens, tokens: [version: version])
     rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
-    version = project.version.releaseVersion
     webInf { from 'resources/test/WEB-INF' }
     classifier 'test' }
 

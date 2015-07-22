@@ -57,7 +57,8 @@ songsDB = NLSongsContext.songsDB
 
         <script type="application/javascript">
             window.onload = function() { \$("#services-table").
-                dataTable({ "paging": false }); };
+                dataTable({ "paging": false,
+                            "order": [[0, "desc"]]}); };
         </script>
     </body>
 </html>

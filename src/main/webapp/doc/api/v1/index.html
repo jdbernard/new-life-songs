@@ -142,11 +142,26 @@ Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
                 in with the request will be ignored.
 
                 <p><h4>Reponse</h4>
-                The newly-created song record.
+                The newly-created song record. If a value is given in the
+                request for the <tt>id</tt> attribute it is ignored. The
+                attribute for new records is determined by the service and
+                returned as part of the response.
 
                 <p><h4>Example</h4>
                 <pre>
-                </pre></li>
+POST http://newlifesongs.jdbernard.com/api/v1/songs
+Content-Length: 60
+Content-Type: application/json
+
+{"id":22,"name":"This is How We Praise Him","artists":[""]}
+</pre>
+<p><pre>
+HTTP/1.1 201 Created
+Content-Length: 
+Content-Type: application/json
+
+
+</pre></li>
 
             <li><h3><code>GET /songs/&lt;songId&gt;</code></h3>
 

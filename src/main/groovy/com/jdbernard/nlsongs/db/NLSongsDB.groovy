@@ -315,7 +315,7 @@ public class NLSongsDB {
         return buildToken(row, user) }
 
     public static List<String> unwrapArtists(String artists) {
-        return artists.split(';') as List<String> }
+        return artists.split(':') as List<String> }
 
     public static String wrapArtists(List<String> artists) {
         return artists.join(':') }
