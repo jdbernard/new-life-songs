@@ -27,10 +27,7 @@ public class NLSongsDB {
     /// ### Common
     public def save(def model) {
         if (model.id > 0) return update(model)
-        else {
-            if (create(model) > 0) return model
-            else return null } }
-
+        else return create(model) }
 
     /// ### Services
     public Service findService(int id) {
