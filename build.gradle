@@ -39,7 +39,7 @@ dependencies {
 
 }
 
-war { 
+war {
     from "resources/webapp"
     from "build/webapp"
     version = project.version.releaseVersion
@@ -70,7 +70,7 @@ task compileScss(
 
 war.dependsOn compileScss
 testWar.dependsOn compileScss
-    
+
 // ## Build Versioning task
 task incrementBuildNumber(
     group: 'versioning',
