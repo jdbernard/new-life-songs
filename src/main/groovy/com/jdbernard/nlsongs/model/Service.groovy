@@ -16,7 +16,7 @@ public class Service implements Serializable {
         Service that = (Service) thatObj
 
         return (this.id == that.id &&
-                this.date == (that.rawDate) &&
+                this.date == (that.locaDate) &&
                 this.serviceType == that.serviceType) }
 
     public void setDate(Date date) { this.date = LocalDate.fromDateFields(date) }
@@ -29,5 +29,5 @@ public class Service implements Serializable {
 
     // Needed only because the @directFieldAccesor syntax stopped working in
     // Groovy 2.4.7
-    private LocalDate getRawDate() { return this.date }
+    private LocalDate getLocalDate() { return this.date }
 }

@@ -22,7 +22,7 @@ if (!service) { response.sendError(response.SC_NOT_FOUND); return }
         <meta name="referrer" content="origin">
         <link rel="shortcut icon" href="../images/favicon.ico">
 
-        <title><%= service.@date.toString("yyyy-MM-dd")
+        <title><%= service.localDate.toString("yyyy-MM-dd")
            %> (<%= service.serviceType.displayName %>) - New Life Songs Database</title>
         <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <!--<script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"></script>-->
@@ -38,7 +38,7 @@ if (!service) { response.sendError(response.SC_NOT_FOUND); return }
     <body>
         <header>
             <h1><a href="../">New Life Songs</a></h1>
-            <h2 class=service-desc><%= service.@date.toString("yyyy-MM-dd") %>: (<%=
+            <h2 class=service-desc><%= service.localDate.toString("yyyy-MM-dd") %>: (<%=
                     service.description ?: service.serviceType.displayName %>)</h2>
 
             <nav><ul>

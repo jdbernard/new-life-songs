@@ -67,7 +67,7 @@ if (!song) { response.sendError(response.SC_NOT_FOUND); return }
                     sort { it.svc.date }.each { row -> %>
                     <tr><td class=actions><a href='<%= NLSongsContext.makeUrl(row.svc, song) %>'><i class="fa fa-download"></i></a></td>
                         <td class=performance-date><a href='../service/<%= row.svc.id %>'><%= 
-                                row.svc.@date.toString("yyyy-MM-dd") %></a></td>
+                                row.svc.localDate.toString("yyyy-MM-dd") %></a></td>
                         <td class=service-type><%= row.svc.serviceType.displayName %></td>
                         <td class=not-small><%= row.perf.leader ?: "" %></td>
                         <td class=not-small><%= row.perf.pianist ?: "" %></td>
