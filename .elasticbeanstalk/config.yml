@@ -1,0 +1,12 @@
+branch-defaults:
+  master:
+    environment: new-life-songs-env
+global:
+  application_name: new-life-songs
+  branch: null
+  default_ec2_keyname: id_jdb@jdb-maingear
+  default_platform: Tomcat 8 Java 8
+  default_region: us-west-2
+  profile: eb-cli
+  repository: null
+  sc: git
