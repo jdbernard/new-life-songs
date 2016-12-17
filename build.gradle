@@ -74,29 +74,29 @@ testWar.dependsOn compileScss
 task incrementBuildNumber(
     group: 'versioning',
     description: "Increment the project's build number."
-)  << { ++version.build }
+)  { doLast  { ++version.build } }
 
 task incrementMinorNumber(
     group: 'versioning',
     description: "Increment the project's minor version number."
-)  << { ++version.minor }
+)  { doLast { ++version.minor } }
 
 task incrementMajorNumber(
     group: 'versioning',
     description: "Increment the project's major version number."
-)  << { ++version.major }
+)  { doLast { ++version.major } }
 
 task markReleaseBuild(
     group: 'versioning',
     description: "Mark this version of the project as a release version."
-)  << { version.release = true }
+)  { doLast { version.release = true } }
 
 war.dependsOn << incrementBuildNumber
 testWar.dependsOn << incrementBuildNumber
 
 // ## Custom tasks for local deployment
 
-task deployLocal(dependsOn: ['build']) << {
+task deployLocal(dependsOn: ['build']) { doLast {
     def warName = "${project.name}-${version.releaseVersion}.war"
     def jettyHome = System.getenv("JETTY_HOME")
     def deployedWar = new File("$jettyHome/webapps/$warName")
@@ -105,16 +105,29 @@ task deployLocal(dependsOn: ['build']) << {
     copy {
         from "build/libs"
         into "$jettyHome/webapps"
-        include warName } }
+        include warName } } }
 
-task killJettyLocal() << {
+task deployProd(dependsOn: ['build']) { doLast {
+  def warName = "${project.name}-${version.releaseVersion}.war"
+  def artifactName = "${project.name}.war"
+
+  copy {
+    from "build/libs"
+    into "build"
+    include warName
+    rename warName, artifactName }
+
+  shell_("eb", "deploy", "-l", "${project.name}-${version}")
+} }
+
+task killJettyLocal() { doLast {
     def pidFile = new File(System.properties['user.home'] + "/temp/jetty.pid")
 
     println "Killing old Jetty instance."
-    shell_("sh", "-c", 'kill $(jps -l | grep start.jar | cut -f 1 -d " ")') }
+    shell_("sh", "-c", 'kill $(jps -l | grep start.jar | cut -f 1 -d " ")') } }
 
-task localJetty(dependsOn: ['killJettyLocal', 'deployLocal']) << {
-    spawn(["java", "-jar", "start.jar"], new File(jettyHome)) }
+task localJetty(dependsOn: ['killJettyLocal', 'deployLocal']) { doLast {
+    spawn(["java", "-jar", "start.jar"], new File(jettyHome)) } }
 
 // ## Project Version
 class ProjectVersion {

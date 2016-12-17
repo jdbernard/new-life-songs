@@ -10,3 +10,5 @@ global:
   profile: eb-cli
   repository: null
   sc: git
+deploy:
+  artifact: build/ROOT.war

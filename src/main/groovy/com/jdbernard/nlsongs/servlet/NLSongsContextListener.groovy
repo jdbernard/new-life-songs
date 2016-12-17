@@ -9,16 +9,31 @@ import com.jdbernard.nlsongs.db.NLSongsDB
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 public final class NLSongsContextListener implements ServletContextListener {
+
+    private static final log = LoggerFactory.getLogger(NLSongsContextListener)
 
     public void contextInitialized(ServletContextEvent event) {
         def context = event.servletContext
 
-        // Load the context configuration.
         Properties props = new Properties()
-        NLSongsContextListener.getResourceAsStream(
-            context.getInitParameter('context.config.file')).withStream { is ->
-                props.load(is) }
+
+        // Load database details from the context configuration.
+        String contextConfigFile = context.getInitParameter('context.config.file')
+        if (contextConfigFile) {
+          NLSongsContextListener.getResourceAsStream(contextConfigFile)
+            .withStream { is -> props.load(is) } }
+
+        // Load database configuration from environment variables (may
+        // override settings in file).
+        def env = System.getenv()
+        env.keySet().findAll { it.startsWith('DB_') }.each { key ->
+          props[key.substring(3)] = env[key] }
+
+        log.debug("Database configuration: {}", props)
 
         // Create the pooled data source
         HikariConfig hcfg = new HikariConfig(
@@ -39,6 +54,6 @@ public final class NLSongsContextListener implements ServletContextListener {
         // Shutdown the Songs DB instance (it will shut down the data source).
         NLSongsDB songsDB = context.getAttribute('songsDB')
         if (songsDB) songsDB.shutdown()
-        
+
         context.removeAttribute('songsDB') }
 }

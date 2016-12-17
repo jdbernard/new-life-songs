@@ -7,7 +7,7 @@ import com.jdbernard.nlsongs.model.Song
 public class NLSongsContext {
 
     public static NLSongsDB songsDB
-    
+
     public static String mediaBaseUrl
 
     public static String makeUrl(Service service, Song song) {
