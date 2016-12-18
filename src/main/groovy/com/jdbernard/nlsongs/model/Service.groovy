@@ -16,7 +16,7 @@ public class Service implements Serializable {
         Service that = (Service) thatObj
 
         return (this.id == that.id &&
-                this.date == (that.locaDate) &&
+                this.date == (that.localDate) &&
                 this.serviceType == that.serviceType) }
 
     public void setDate(Date date) { this.date = LocalDate.fromDateFields(date) }
