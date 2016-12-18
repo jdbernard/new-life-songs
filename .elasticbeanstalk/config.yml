@@ -1,6 +1,6 @@
 branch-defaults:
   master:
-    environment: new-life-songs-env
+    environment: new-life-songs-prod
 global:
   application_name: new-life-songs
   branch: null
