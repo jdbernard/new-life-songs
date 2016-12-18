@@ -5,8 +5,6 @@ apply plugin: "maven"
 apply plugin: "war"
 apply plugin: "jetty"
 
-apply from: 'shell.gradle'
-
 group = "com.jdbernard"
 
 version = new ProjectVersion()
@@ -109,7 +107,7 @@ task deployLocal(dependsOn: ['build']) { doLast {
 
 task deployProd(dependsOn: ['build']) { doLast {
   def warName = "${project.name}-${version.releaseVersion}.war"
-  def artifactName = "${project.name}.war"
+  def artifactName = "ROOT.war"
 
   copy {
     from "build/libs"
@@ -179,3 +177,37 @@ class ProjectVersion {
             this[it] = props[it] ? props[it] as int : 0 }
         release = Boolean.parseBoolean(props["version.release"]) }
 }
+
+// ## Utility methods for working with processes.
+
+def shell_(List<String> cmd) { shell(cmd, null, false) }
+def shell_(String... cmd) { shell(cmd, null, false) }
+def shell(String... cmd) { shell(cmd, null, true) }
+
+def shell(List<String> cmd, File workingDir, boolean checkExit) {
+    shell(cmd as String[], workingDir, checkExit) }
+
+def shell(String[] cmd, File workingDir, boolean checkExit) {
+    def pb = new ProcessBuilder(cmd)
+    if (workingDir) pb.directory(workingDir)
+    def process = pb.start()
+    process.waitForProcessOutput(System.out, System.err)
+
+    if (process.exitValue() != 0)
+        println "Command $cmd exited with non-zero result code."
+    if (checkExit) assert process.exitValue() == 0 : "Not ignoring failed command." }
+
+def shell(List<List<String>> cmds, File workingDir) {
+    cmds.each {
+        ProcessBuilder pb = new ProcessBuilder(it)
+        pb.directory(workingDir)
+        pb.start().waitForProcessOutput(System.out, System.err) } }
+
+def spawn(String... cmd) { spawn(cmd, null) }
+def spawn(List<String> cmd, File workingDir) { spawn(cmd as String[], workingDir) }
+def spawn(String[] cmd, File workingDir) {
+    def pb = new ProcessBuilder(cmd)
+    if (workingDir) pb.directory(workingDir)
+    def process = pb.start() }
+
+
