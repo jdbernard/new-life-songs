@@ -1,19 +1,32 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
+buildscript {
+  repositories {
+    maven { url 'https://mvn.jdb-labs.com/repo' }
+  }
+  dependencies {
+    classpath 'com.jdbernard:gradle-exec-util:0.2.0'
+  }
+}
+
+plugins { id 'com.palantir.git-version' version '0.5.2' }
+
 apply plugin: "groovy"
 apply plugin: "maven"
 apply plugin: "war"
-apply plugin: "jetty"
 
 group = "com.jdbernard"
 
-version = new ProjectVersion()
+import static com.jdbernard.gradle.ExecUtil.*
+
+version = gitVersion()
 
 // webAppDirName = "build/webapp/main"
 
 repositories {
     mavenLocal()
-    mavenCentral() }
+    mavenCentral()
+}
 
 dependencies {
     compile 'ch.qos.logback:logback-classic:1.1.8'
@@ -33,13 +46,11 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     testRuntime 'com.h2database:h2:1.4.186'
-
 }
 
 war {
     from "resources/webapp"
     from "build/webapp"
-    version = project.version.releaseVersion
     filter(ReplaceTokens, tokens: [version: version])
     rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
     webInf { from 'resources/main/WEB-INF' }
@@ -50,7 +61,6 @@ test { testLogging { events 'failed' } }
 
 task testWar(type: War) {
     from 'resources/webapp'
-    version = project.version.releaseVersion
     filter(ReplaceTokens, tokens: [version: version])
     rename '(.+)(\\..*(css|js))', '$1-' + version + '$2'
     webInf { from 'resources/test/WEB-INF' }
@@ -68,45 +78,8 @@ task compileScss(
 war.dependsOn compileScss
 testWar.dependsOn compileScss
 
-// ## Build Versioning task
-task incrementBuildNumber(
-    group: 'versioning',
-    description: "Increment the project's build number."
-)  { doLast  { ++version.build } }
-
-task incrementMinorNumber(
-    group: 'versioning',
-    description: "Increment the project's minor version number."
-)  { doLast { ++version.minor } }
-
-task incrementMajorNumber(
-    group: 'versioning',
-    description: "Increment the project's major version number."
-)  { doLast { ++version.major } }
-
-task markReleaseBuild(
-    group: 'versioning',
-    description: "Mark this version of the project as a release version."
-)  { doLast { version.release = true } }
-
-war.dependsOn << incrementBuildNumber
-testWar.dependsOn << incrementBuildNumber
-
-// ## Custom tasks for local deployment
-
-task deployLocal(dependsOn: ['build']) { doLast {
-    def warName = "${project.name}-${version.releaseVersion}.war"
-    def jettyHome = System.getenv("JETTY_HOME")
-    def deployedWar = new File("$jettyHome/webapps/$warName")
-
-    if (deployedWar.exists()) deployedWar.delete();
-    copy {
-        from "build/libs"
-        into "$jettyHome/webapps"
-        include warName } } }
-
 task deployProd(dependsOn: ['build']) { doLast {
-  def warName = "${project.name}-${version.releaseVersion}.war"
+  def warName = "${project.name}-${version}.war"
   def artifactName = "ROOT.war"
 
   copy {
@@ -115,99 +88,5 @@ task deployProd(dependsOn: ['build']) { doLast {
     include warName
     rename warName, artifactName }
 
-  shell_("eb", "deploy", "-l", "${project.name}-${version}")
+  exec("eb", "deploy", "-l", "${project.name}-${version}")
 } }
-
-task killJettyLocal() { doLast {
-    def pidFile = new File(System.properties['user.home'] + "/temp/jetty.pid")
-
-    println "Killing old Jetty instance."
-    shell_("sh", "-c", 'kill $(jps -l | grep start.jar | cut -f 1 -d " ")') } }
-
-task localJetty(dependsOn: ['killJettyLocal', 'deployLocal']) { doLast {
-    spawn(["java", "-jar", "start.jar"], new File(jettyHome)) } }
-
-// ## Project Version
-class ProjectVersion {
-
-    private File versionFile
-
-    int major
-    int minor
-    int build
-    boolean release
-
-    public ProjectVersion() { this(new File('version.properties')) }
-
-    public ProjectVersion(File versionFile) {
-        this.versionFile = versionFile
-
-        if (!versionFile.exists()) {
-            versionFile.createNewFile()
-            this.major = this.minor = this.build = 0
-            this.save() }
-
-        else this.load() }
-
-    @Override String toString() { "$major.$minor${release ? '' : '-build' + build}" }
-
-    public String getReleaseVersion() { "$major.$minor" }
-
-    public void setRelease(boolean release) { this.release = release; save() }
-
-    public void setMajor(int major) {
-        this.major = major; minor = build = 0; release = false; save() }
-
-    public void setMinor(int minor) {
-        this.minor = minor; build = 0; release = false; save() }
-
-    public void setBuild(int build) { this.build = build; save() }
-
-    private void save() {
-        def props = new Properties()
-        versionFile.withInputStream { props.load(it) }
-        ["major", "minor", "build"].each { props[it] = this[it].toString() }
-        props["version.release"] = release.toString()
-        versionFile.withOutputStream { props.store(it, "") } }
-
-    private void load() {
-        def props = new Properties()
-        versionFile.withInputStream { props.load(it) }
-        ["major", "minor", "build"].each {
-            this[it] = props[it] ? props[it] as int : 0 }
-        release = Boolean.parseBoolean(props["version.release"]) }
-}
-
-// ## Utility methods for working with processes.
-
-def shell_(List<String> cmd) { shell(cmd, null, false) }
-def shell_(String... cmd) { shell(cmd, null, false) }
-def shell(String... cmd) { shell(cmd, null, true) }
-
-def shell(List<String> cmd, File workingDir, boolean checkExit) {
-    shell(cmd as String[], workingDir, checkExit) }
-
-def shell(String[] cmd, File workingDir, boolean checkExit) {
-    def pb = new ProcessBuilder(cmd)
-    if (workingDir) pb.directory(workingDir)
-    def process = pb.start()
-    process.waitForProcessOutput(System.out, System.err)
-
-    if (process.exitValue() != 0)
-        println "Command $cmd exited with non-zero result code."
-    if (checkExit) assert process.exitValue() == 0 : "Not ignoring failed command." }
-
-def shell(List<List<String>> cmds, File workingDir) {
-    cmds.each {
-        ProcessBuilder pb = new ProcessBuilder(it)
-        pb.directory(workingDir)
-        pb.start().waitForProcessOutput(System.out, System.err) } }
-
-def spawn(String... cmd) { spawn(cmd, null) }
-def spawn(List<String> cmd, File workingDir) { spawn(cmd as String[], workingDir) }
-def spawn(String[] cmd, File workingDir) {
-    def pb = new ProcessBuilder(cmd)
-    if (workingDir) pb.directory(workingDir)
-    def process = pb.start() }
-
-
